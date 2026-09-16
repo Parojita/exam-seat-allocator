@@ -1,0 +1,19 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+
+# Flask local database and data
+instance/
+
+# VS Code local settings
+.vscode/
+
+# Generated files
+*.pdf
+*.xlsx
