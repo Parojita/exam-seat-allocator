@@ -27,3 +27,23 @@ class Student(db.Model):
     )
 
     branch = db.relationship("Branch", back_populates="students")
+class Room(db.Model):
+    __tablename__ = "rooms"
+
+    id = db.Column(db.Integer, primary_key=True)
+    room_number = db.Column(
+    db.String(50),
+    nullable=False,
+    unique=True,
+)
+    rows = db.Column(db.Integer, nullable=False)
+    columns = db.Column(db.Integer, nullable=False)
+    students_per_desk = db.Column(
+        db.Integer,
+        nullable=False,
+        default=1,
+    )
+
+    @property
+    def capacity(self):
+        return self.rows * self.columns * self.students_per_desk
