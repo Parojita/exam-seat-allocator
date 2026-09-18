@@ -10,28 +10,112 @@ Import Data | Examination Seat Allocator
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
                 <p class="text-primary fw-semibold mb-2">
-                    ADMINISTRATION
+                    Administration
                 </p>
 
-                <h1 class="h2 fw-bold">
+                <h1 class="display-6 fw-bold">
                     Import Examination Data
                 </h1>
 
                 <p class="text-secondary">
-                    Upload one approved Excel workbook. The file will
-                    be validated before any records are imported.
+                    Upload an Excel workbook containing student
+                    information.
                 </p>
 
                 {% if error_message %}
-                    <div class="alert alert-danger" role="alert">
+                    <div
+                        class="alert alert-danger mt-4"
+                        role="alert"
+                    >
                         {{ error_message }}
                     </div>
                 {% endif %}
 
-                {% if success_message %}
-                    <div class="alert alert-success" role="alert">
-                        {{ success_message }}
-                    </div>
+                {% if validation_result %}
+                    {% if validation_result.valid %}
+                        <div
+                            class="alert alert-success mt-4"
+                            role="alert"
+                        >
+                            <h2 class="h5 alert-heading">
+                                Validation successful
+                            </h2>
+
+                            <p class="mb-1">{{ validation_result.row_count }} student rows found.</p>
+
+                            <p class="mb-1">
+                                Workbook is ready for import preview.
+                            </p>
+
+                            {% if import_result %}
+                                <hr>
+
+                                <p class="mb-1 fw-semibold">
+                                    Import completed
+                                </p>
+
+                                <p class="mb-1">{{ import_result.imported_count }} students imported.</p>
+
+                                <p class="mb-0">{{ import_result.skipped_count }} existing students skipped.</p>
+                            {% endif %}
+
+                            {% if uploaded_filename %}
+                                <p class="mt-3 mb-0">
+                                    File: {{ uploaded_filename }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div
+                            class="alert alert-danger mt-4"
+                            role="alert"
+                        >
+                            <h2 class="h5 alert-heading">
+                                Workbook validation failed.
+                            </h2>
+
+                            {% if validation_result.missing_columns %}
+                                <p>
+                                    The following required columns
+                                    are missing:
+                                </p>
+
+                                <ul>
+                                    {% for column in
+                                        validation_result.missing_columns %}
+                                        <li>
+                                            <code>{{ column }}</code>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+
+                            {% if validation_result.row_errors %}
+                                <p>
+                                    Problems were found in the
+                                    following student rows:
+                                </p>
+
+                                <ul class="mb-0">
+                                    {% for error in
+                                        validation_result.row_errors %}
+                                        <li class="mb-2">
+                                            <strong>Row {{ error.row_number }}</strong>
+
+                                            <ul>
+                                                {% for message in
+                                                    error.messages %}
+                                                    <li>
+                                                        {{ message }}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 {% endif %}
 
                 <form
@@ -43,27 +127,29 @@ Import Data | Examination Seat Allocator
                         for="workbook"
                         class="form-label fw-semibold"
                     >
-                        Excel workbook
+                        Student workbook
                     </label>
 
                     <input
-                        class="form-control form-control-lg"
-                        type="file"
+                        class="form-control"
                         id="workbook"
                         name="workbook"
+                        type="file"
                         accept=".xlsx"
                         required
                     >
 
                     <div class="form-text">
-                        Accepted format: .xlsx
+                        Accepted file: students.xlsx
                     </div>
 
                     <button
                         class="btn btn-primary btn-lg mt-4"
                         type="submit"
+                        name="action"
+                        value="import"
                     >
-                        Validate Workbook
+                        Validate and Import
                     </button>
                 </form>
             </div>
@@ -71,18 +157,19 @@ Import Data | Examination Seat Allocator
 
         <div class="card border-0 shadow-sm rounded-4 mt-4">
             <div class="card-body p-4">
-                <h2 class="h5 fw-bold">Expected workbooks</h2>
+                <h2 class="h5 fw-bold">
+                    Required columns
+                </h2>
 
                 <div class="workbook-grid mt-3">
-                    <span>students.xlsx</span>
-                    <span>subjects.xlsx</span>
-                    <span>eligibility.xlsx</span>
-                    <span>exams.xlsx</span>
-                    <span>rooms.xlsx</span>
-                    <span>desks.xlsx</span>
-                    <span>faculties.xlsx</span>
-                    <span>faculty_subjects.xlsx</span>
-                    <span>faculty_availability.xlsx</span>
+                    <span>roll_number</span>
+                    <span>name</span>
+                    <span>branch_code</span>
+                    <span>semester</span>
+                    <span>email</span>
+                    <span>photo_path</span>
+                    <span>special_request</span>
+                    <span>rfid_uid</span>
                 </div>
             </div>
         </div>
