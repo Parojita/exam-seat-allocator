@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<section class="hero-panel p-5 rounded-4 shadow-sm">
+    <p class="text-primary fw-semibold mb-2">
+        EXAMINATION MANAGEMENT
+    </p>
+
+    <h1 class="display-5 fw-bold">
+        Automated Seat Allocation
+    </h1>
+
+    <p class="lead text-secondary mt-3">
+        Import university records, validate examination data,
+        allocate students and generate hall documents.
+    </p>
+
+    <a
+        class="btn btn-primary btn-lg mt-3"
+        href="{{ url_for('main.admin_import') }}"
+    >
+        Import Excel Data
+    </a>
+</section>
+
+<section class="row g-4 mt-4">
+    <div class="col-md-4">
+        <div class="dashboard-card h-100">
+            <h2 class="h5">Students</h2>
+            <p class="text-secondary mb-0">
+                Import students, branches and eligibility records.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="dashboard-card h-100">
+            <h2 class="h5">Rooms and Seats</h2>
+            <p class="text-secondary mb-0">
+                Manage capacities, flexible seats and adjacency.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="dashboard-card h-100">
+            <h2 class="h5">Allocation</h2>
+            <p class="text-secondary mb-0">
+                Generate mixed-branch seating plans and reports.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

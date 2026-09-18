@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}
+Import Data | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <p class="text-primary fw-semibold mb-2">
+                    ADMINISTRATION
+                </p>
+
+                <h1 class="h2 fw-bold">
+                    Import Examination Data
+                </h1>
+
+                <p class="text-secondary">
+                    Upload one approved Excel workbook. The file will
+                    be validated before any records are imported.
+                </p>
+
+                {% if error_message %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {% if success_message %}
+                    <div class="alert alert-success" role="alert">
+                        {{ success_message }}
+                    </div>
+                {% endif %}
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    class="mt-4"
+                >
+                    <label
+                        for="workbook"
+                        class="form-label fw-semibold"
+                    >
+                        Excel workbook
+                    </label>
+
+                    <input
+                        class="form-control form-control-lg"
+                        type="file"
+                        id="workbook"
+                        name="workbook"
+                        accept=".xlsx"
+                        required
+                    >
+
+                    <div class="form-text">
+                        Accepted format: .xlsx
+                    </div>
+
+                    <button
+                        class="btn btn-primary btn-lg mt-4"
+                        type="submit"
+                    >
+                        Validate Workbook
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 mt-4">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold">Expected workbooks</h2>
+
+                <div class="workbook-grid mt-3">
+                    <span>students.xlsx</span>
+                    <span>subjects.xlsx</span>
+                    <span>eligibility.xlsx</span>
+                    <span>exams.xlsx</span>
+                    <span>rooms.xlsx</span>
+                    <span>desks.xlsx</span>
+                    <span>faculties.xlsx</span>
+                    <span>faculty_subjects.xlsx</span>
+                    <span>faculty_availability.xlsx</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
