@@ -160,7 +160,41 @@ class StudentEligibility(db.Model):
         db.ForeignKey("subjects.id"),
         nullable=False,
     )
+    attendance_percentage = db.Column(
+        db.Float,
+        nullable=False,
+        default=0.0,
+    )
 
+    ppt_marks = db.Column(
+        db.Float,
+        nullable=False,
+        default=0.0,
+    )
+
+    assignment_marks = db.Column(
+        db.Float,
+        nullable=False,
+        default=0.0,
+    )
+
+    ct1_marks = db.Column(
+        db.Float,
+        nullable=False,
+        default=0.0,
+    )
+
+    ct2_marks = db.Column(
+        db.Float,
+        nullable=False,
+        default=0.0,
+    )
+
+    semester_fee_paid = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+    )
     eligible = db.Column(
         db.Boolean,
         nullable=False,

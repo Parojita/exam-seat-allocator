@@ -1,3 +1,8 @@
+from app.services.eligibility_service import (
+    EligibilityValidationError,
+    get_eligibility_view,
+    save_eligibility,
+)
 from pathlib import Path
 from zipfile import BadZipFile
 
@@ -239,6 +244,69 @@ def admin_examinations():
         "admin_examinations.html",
         subjects=subjects,
         examinations=examinations,
+        error_message=error_message,
+        success_message=success_message,
+    )
+@main.route(
+    "/admin/eligibility",
+    methods=["GET", "POST"],
+)
+def admin_eligibility():
+    error_message = None
+    success_message = None
+    selected_subject_id = request.values.get(
+        "subject_id"
+    )
+
+    if request.method == "POST":
+        try:
+            result = save_eligibility(
+                selected_subject_id,
+                request.form,
+            )
+
+            success_message = (
+                "Eligibility saved: "
+                f"{result['eligible_count']} eligible, "
+                f"{result['ineligible_count']} ineligible."
+            )
+
+        except EligibilityValidationError as error:
+            error_message = str(error)
+
+        except SQLAlchemyError:
+            error_message = (
+                "Eligibility could not be saved. "
+                "No database changes were made."
+            )
+
+    try:
+        view = get_eligibility_view(
+            selected_subject_id
+        )
+
+    except EligibilityValidationError as error:
+        error_message = str(error)
+
+        view = {
+            "subject": None,
+            "rows": [],
+            "matching_count": 0,
+            "eligible_count": 0,
+            "ineligible_count": 0,
+        }
+
+    subjects = db.session.execute(
+        db.select(Subject)
+        .where(Subject.active.is_(True))
+        .order_by(Subject.subject_code)
+    ).scalars().all()
+
+    return render_template(
+        "admin_eligibility.html",
+        subjects=subjects,
+        selected_subject_id=selected_subject_id,
+        view=view,
         error_message=error_message,
         success_message=success_message,
     )

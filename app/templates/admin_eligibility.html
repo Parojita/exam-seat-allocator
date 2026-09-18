@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}
+Student Eligibility | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <p class="text-primary fw-semibold mb-2">
+            ADMINISTRATION
+        </p>
+
+        <h1 class="h2 fw-bold">
+            Student Eligibility
+        </h1>
+
+        {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if success_message %}
+            <div class="alert alert-success">
+                {{ success_message }}
+            </div>
+        {% endif %}
+
+        <form method="get" class="row g-3 mt-2">
+            <div class="col-md-8">
+                <label
+                    for="subject_id"
+                    class="form-label"
+                >
+                    Select Subject
+                </label>
+
+                <select
+                    id="subject_id"
+                    name="subject_id"
+                    class="form-select"
+                    required
+                >
+                    <option value="">
+                        Select Subject
+                    </option>
+
+                    {% for subject in subjects %}
+                        <option
+                            value="{{ subject.id }}"
+                            {% if selected_subject_id|string
+                                == subject.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ subject.subject_code }}
+                            —
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Load Students
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if view.subject %}
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold">
+                {{ view.subject.subject_code }}
+                Eligibility
+            </h2>
+
+            <p class="text-secondary">
+                {{ view.matching_count }} matching students
+            </p>
+
+            {% if view.rows %}
+                <form method="post">
+                    <input
+                        type="hidden"
+                        name="subject_id"
+                        value="{{ view.subject.id }}"
+                    >
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Attendance %</th>
+                                    <th>PPT /10</th>
+                                    <th>Assignment /10</th>
+                                    <th>CT-1 /20</th>
+                                    <th>CT-2 /20</th>
+                                    <th>Fee paid</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for row in view.rows %}
+                                    {% set student = row.student %}
+                                    {% set record = row.record %}
+
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                {{ student.roll_number }}
+                                            </strong>
+                                            <br>
+                                            {{ student.name }}
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                class="form-control"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="100"
+                                                name="attendance_{{ student.id }}"
+                                                value="{% if record %}{{ record.attendance_percentage }}{% endif %}"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                class="form-control"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="10"
+                                                name="ppt_{{ student.id }}"
+                                                value="{% if record %}{{ record.ppt_marks }}{% endif %}"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                class="form-control"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="10"
+                                                name="assignment_{{ student.id }}"
+                                                value="{% if record %}{{ record.assignment_marks }}{% endif %}"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                class="form-control"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="20"
+                                                name="ct1_{{ student.id }}"
+                                                value="{% if record %}{{ record.ct1_marks }}{% endif %}"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                class="form-control"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="20"
+                                                name="ct2_{{ student.id }}"
+                                                value="{% if record %}{{ record.ct2_marks }}{% endif %}"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                name="fee_paid_{{ student.id }}"
+                                                value="yes"
+                                                {% if record
+                                                    and record.semester_fee_paid %}
+                                                    checked
+                                                {% endif %}
+                                            >
+                                        </td>
+
+                                        <td>
+                                            {% if row.result %}
+                                                {% if row.result.eligible %}
+                                                    <span
+                                                        class="badge text-bg-success"
+                                                    >
+                                                        Eligible
+                                                    </span>
+                                                {% else %}
+                                                    <span
+                                                        class="badge text-bg-danger"
+                                                    >
+                                                        Ineligible
+                                                    </span>
+
+                                                    <ul class="small mt-2">
+                                                        {% for reason in
+                                                            row.result.reasons %}
+                                                            <li>
+                                                                {{ reason }}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            {% else %}
+                                                <span
+                                                    class="text-secondary"
+                                                >
+                                                    Not evaluated
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                    >
+                        Calculate and Save Eligibility
+                    </button>
+                </form>
+            {% else %}
+                <div class="alert alert-warning">
+                    No active students match this subject's
+                    branch and semester.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
