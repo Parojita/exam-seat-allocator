@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}
+Subject Management | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <p class="text-primary fw-semibold mb-2">
+                    ADMINISTRATION
+                </p>
+
+                <h1 class="h2 fw-bold">
+                    Subject Management
+                </h1>
+
+                <h2 class="h5 mt-4">
+                    Add Subject
+                </h2>
+
+                {% if error_message %}
+                    <div
+                        class="alert alert-danger"
+                        role="alert"
+                    >
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {% if success_message %}
+                    <div
+                        class="alert alert-success"
+                        role="alert"
+                    >
+                        {{ success_message }}
+                    </div>
+                {% endif %}
+
+                {% if branches %}
+                    <form method="post" class="mt-4">
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="subject_code"
+                            >
+                                Subject code
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="subject_code"
+                                name="subject_code"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="name"
+                            >
+                                Subject name
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="name"
+                                name="name"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="branch_id"
+                            >
+                                Branch
+                            </label>
+
+                            <select
+                                class="form-select"
+                                id="branch_id"
+                                name="branch_id"
+                                required
+                            >
+                                <option value="">
+                                    Select branch
+                                </option>
+
+                                {% for branch in branches %}
+                                    <option value="{{ branch.id }}">
+                                        {{ branch.code }}
+                                        —
+                                        {{ branch.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="semester"
+                            >
+                                Semester
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="semester"
+                                name="semester"
+                                type="number"
+                                min="1"
+                                max="8"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="exam_type"
+                            >
+                                Exam type
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="exam_type"
+                                name="exam_type"
+                                list="exam-types"
+                                required
+                            >
+
+                            <datalist id="exam-types">
+                                <option value="CT">
+                                <option value="Mid Term">
+                                <option value="End Semester">
+                                <option value="Supplementary">
+                                <option value="Backlog">
+                                <option value="Practical">
+                                <option value="Viva">
+                            </datalist>
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="duration_minutes"
+                            >
+                                Duration in minutes
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="duration_minutes"
+                                name="duration_minutes"
+                                type="number"
+                                min="1"
+                                max="600"
+                                required
+                            >
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            type="submit"
+                        >
+                            Create Subject
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning mt-4">
+                        Import students first so branch records
+                        are available.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">
+                    Existing Subjects
+                </h2>
+
+                {% if subjects %}
+                    <div class="table-responsive mt-3">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject</th>
+                                    <th>Branch</th>
+                                    <th>Semester</th>
+                                    <th>Type</th>
+                                    <th>Minutes</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for subject in subjects %}
+                                    <tr>
+                                        <td>
+                                            {{ subject.subject_code }}
+                                        </td>
+
+                                        <td>
+                                            {{ subject.name }}
+                                        </td>
+
+                                        <td>
+                                            {{ subject.branch.code }}
+                                        </td>
+
+                                        <td>
+                                            {{ subject.semester }}
+                                        </td>
+
+                                        <td>
+                                            {{ subject.exam_type }}
+                                        </td>
+
+                                        <td>
+                                            {{ subject.duration_minutes }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-secondary mt-3">
+                        No subjects have been created.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

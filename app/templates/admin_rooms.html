@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}
+Room Management | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <p class="text-primary fw-semibold mb-2">
+                    ADMINISTRATION
+                </p>
+
+                <h1 class="h2 fw-bold">
+                    Room Management
+                </h1>
+
+                <h2 class="h5 mt-4">
+                    Add Examination Room
+                </h2>
+
+                {% if error_message %}
+                    <div
+                        class="alert alert-danger"
+                        role="alert"
+                    >
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {% if success_message %}
+                    <div
+                        class="alert alert-success"
+                        role="alert"
+                    >
+                        {{ success_message }}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="mt-4">
+                    <div class="mb-3">
+                        <label
+                            for="room_number"
+                            class="form-label"
+                        >
+                            Room number
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="room_number"
+                            name="room_number"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="building"
+                            class="form-label"
+                        >
+                            Building
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="building"
+                            name="building"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="floor"
+                            class="form-label"
+                        >
+                            Floor
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="floor"
+                            name="floor"
+                            type="number"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="room_type"
+                            class="form-label"
+                        >
+                            Room type
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="room_type"
+                            name="room_type"
+                        >
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label
+                                for="rows"
+                                class="form-label"
+                            >
+                                Rows
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="rows"
+                                name="rows"
+                                type="number"
+                                min="1"
+                                max="26"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label
+                                for="columns"
+                                class="form-label"
+                            >
+                                Columns
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="columns"
+                                name="columns"
+                                type="number"
+                                min="1"
+                                max="100"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                    >
+                        Create Room and Seats
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">
+                    Existing Rooms
+                </h2>
+
+                {% if rooms %}
+                    <div class="table-responsive mt-3">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Building</th>
+                                    <th>Layout</th>
+                                    <th>Capacity</th>
+                                    <th>Seats</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for room in rooms %}
+                                    <tr>
+                                        <td>
+                                            {{ room.room_number }}
+                                        </td>
+
+                                        <td>
+                                            {{ room.building or "-" }}
+                                        </td>
+
+                                        <td>
+                                            {{ room.rows }}
+                                            ×
+                                            {{ room.columns }}
+                                        </td>
+
+                                        <td>
+                                            {{ room.capacity }}
+                                        </td>
+
+                                        <td>
+                                            {{ room.seats|length }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-secondary mt-3">
+                        No rooms have been created.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

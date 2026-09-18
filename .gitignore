@@ -17,3 +17,18 @@ instance/
 # Generated files
 *.pdf
 *.xlsx
+# Virtual environment
+.venv/
+
+# Python-generated files
+__pycache__/
+*.pyc
+
+# Pytest cache
+.pytest_cache/
+
+# Local SQLite databases
+instance/*.db
+
+# Environment variables and secrets
+.env

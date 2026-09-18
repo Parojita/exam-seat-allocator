@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1"
     >
+
     <title>
-        {% block title %}Examination Seat Allocator{% endblock %}
+        {% block title %}
+        Examination Seat Allocator
+        {% endblock %}
     </title>
 
     <link
@@ -20,8 +24,15 @@
         href="{{ url_for('static', filename='style.css') }}"
     >
 </head>
+
 <body>
     <nav class="navbar navbar-dark bg-primary shadow-sm">
+<a
+    class="btn btn-outline-light btn-sm"
+    href="{{ url_for('main.admin_examinations') }}"
+>
+    Examinations
+</a>
         <div class="container">
             <a
                 class="navbar-brand fw-semibold"
@@ -30,17 +41,33 @@
                 Examination Seat Allocator
             </a>
 
-            <a
-                class="btn btn-light btn-sm"
-                href="{{ url_for('main.admin_import') }}"
-            >
-                Import Data
-            </a>
+            <div class="d-flex gap-2">
+<a
+    class="btn btn-outline-light btn-sm"
+    href="{{ url_for('main.admin_subjects') }}"
+>
+    Subjects
+</a>
+                <a
+                    class="btn btn-light btn-sm"
+                    href="{{ url_for('main.admin_import') }}"
+                >
+                    Import Data
+                </a>
+
+                <a
+                    class="btn btn-outline-light btn-sm"
+                    href="{{ url_for('main.admin_rooms') }}"
+                >
+                    Room Management
+                </a>
+            </div>
         </div>
     </nav>
 
     <main class="container py-5">
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </main>
 </body>
 </html>

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}
+Examination Management | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <p class="text-primary fw-semibold mb-2">
+                    ADMINISTRATION
+                </p>
+
+                <h1 class="h2 fw-bold">
+                    Examination Management
+                </h1>
+
+                <h2 class="h5 mt-4">
+                    Schedule Examination
+                </h2>
+
+                {% if error_message %}
+                    <div
+                        class="alert alert-danger"
+                        role="alert"
+                    >
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {% if success_message %}
+                    <div
+                        class="alert alert-success"
+                        role="alert"
+                    >
+                        {{ success_message }}
+                    </div>
+                {% endif %}
+
+                {% if subjects %}
+                    <form method="post" class="mt-4">
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="exam_code"
+                            >
+                                Examination code
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="exam_code"
+                                name="exam_code"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="subject_id"
+                            >
+                                Subject
+                            </label>
+
+                            <select
+                                class="form-select"
+                                id="subject_id"
+                                name="subject_id"
+                                required
+                            >
+                                <option value="">
+                                    Select subject
+                                </option>
+
+                                {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">
+                                        {{ subject.subject_code }}
+                                        —
+                                        {{ subject.name }}
+                                        ({{ subject.branch.code }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="exam_date"
+                            >
+                                Examination date
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="exam_date"
+                                name="exam_date"
+                                type="date"
+                                required
+                            >
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label
+                                    class="form-label"
+                                    for="start_time"
+                                >
+                                    Start time
+                                </label>
+
+                                <input
+                                    class="form-control"
+                                    id="start_time"
+                                    name="start_time"
+                                    type="time"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label
+                                    class="form-label"
+                                    for="end_time"
+                                >
+                                    End time
+                                </label>
+
+                                <input
+                                    class="form-control"
+                                    id="end_time"
+                                    name="end_time"
+                                    type="time"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label
+                                class="form-label"
+                                for="exam_type"
+                            >
+                                Exam type
+                            </label>
+
+                            <input
+                                class="form-control"
+                                id="exam_type"
+                                name="exam_type"
+                                list="exam-types"
+                                required
+                            >
+
+                            <datalist id="exam-types">
+                                <option value="CT">
+                                <option value="Mid Term">
+                                <option value="End Semester">
+                                <option value="Supplementary">
+                                <option value="Backlog">
+                                <option value="Improvement">
+                                <option value="Practical">
+                                <option value="Viva">
+                            </datalist>
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            type="submit"
+                        >
+                            Schedule Examination
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning mt-4">
+                        Create at least one subject before
+                        scheduling an examination.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">
+                    Scheduled Examinations
+                </h2>
+
+                {% if examinations %}
+                    <div class="table-responsive mt-3">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for examination in examinations %}
+                                    <tr>
+                                        <td>
+                                            {{ examination.exam_code }}
+                                        </td>
+
+                                        <td>
+                                            {{ examination.subject.subject_code }}
+                                        </td>
+
+                                        <td>
+                                            {{ examination.exam_date }}
+                                        </td>
+
+                                        <td>
+                                            {{ examination.start_time.strftime("%H:%M") }}
+                                            –
+                                            {{ examination.end_time.strftime("%H:%M") }}
+                                        </td>
+
+                                        <td>
+                                            {{ examination.exam_type }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-secondary mt-3">
+                        No examinations have been scheduled.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
