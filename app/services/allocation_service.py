@@ -61,7 +61,26 @@ def get_eligible_students(examination):
     ).scalars().all()
 
 
-def get_available_seats():
+def get_available_seats(examination):
+    occupied_seat_ids = db.session.execute(
+        db.select(SeatAllocation.seat_id)
+        .join(
+            Examination,
+            SeatAllocation.examination_id
+            == Examination.id,
+        )
+        .where(
+            Examination.id
+            != examination.id,
+            Examination.exam_date
+            == examination.exam_date,
+            Examination.start_time
+            < examination.end_time,
+            Examination.end_time
+            > examination.start_time,
+        )
+    ).scalars().all()
+
     statement = (
         db.select(Seat)
         .where(Seat.active.is_(True))
@@ -72,6 +91,11 @@ def get_available_seats():
             Seat.seat_code,
         )
     )
+
+    if occupied_seat_ids:
+        statement = statement.where(
+            Seat.id.not_in(occupied_seat_ids)
+        )
 
     return db.session.execute(
         statement
@@ -169,13 +193,14 @@ def build_solution(
     )
 
     assignments = {
-        (student.id, seat.id): pulp.LpVariable(
+    (student.id, seat.id):
+        problem.add_variable(
             f"x_{student.id}_{seat.id}",
-            cat="Binary",
+            cat=pulp.LpBinary,
         )
-        for student in student_order
-        for seat in seat_order
-    }
+    for student in student_order
+    for seat in seat_order
+}
 
     branches = sorted(
         {
@@ -194,24 +219,25 @@ def build_solution(
     }
 
     branch_at_seat = {
-        (branch_id, seat.id): pulp.LpVariable(
+    (branch_id, seat.id):
+        problem.add_variable(
             f"branch_{branch_id}_{seat.id}",
-            cat="Binary",
+            cat=pulp.LpBinary,
         )
-        for branch_id in branches
-        for seat in seat_order
-    }
+    for branch_id in branches
+    for seat in seat_order
+}
 
     same_branch_penalties = {
-        (branch_id, first_id, second_id):
-            pulp.LpVariable(
-                "same_"
-                f"{branch_id}_{first_id}_{second_id}",
-                cat="Binary",
-            )
-        for branch_id in branches
-        for first_id, second_id in adjacency_pairs
-    }
+    (branch_id, first_id, second_id):
+        problem.add_variable(
+            "same_"
+            f"{branch_id}_{first_id}_{second_id}",
+            cat=pulp.LpBinary,
+        )
+    for branch_id in branches
+    for first_id, second_id in adjacency_pairs
+}
 
     for student in student_order:
         problem += (
@@ -321,11 +347,11 @@ def build_solution(
         + pulp.lpSum(tie_break_cost)
     )
 
-    solver = pulp.PULP_CBC_CMD(
-        msg=False,
-        threads=1,
-        timeLimit=120,
-    )
+    solver = pulp.COIN_CMD(
+    msg=False,
+    threads=1,
+    timeLimit=120,
+)
 
     status = problem.solve(solver)
 
@@ -429,7 +455,9 @@ def allocate_examination(
         examination
     )
 
-    seats = get_available_seats()
+    seats = get_available_seats(
+    examination
+)
 
     adjacency_pairs = get_adjacency_pairs(
         {seat.id for seat in seats}
