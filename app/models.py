@@ -509,3 +509,166 @@ class SeatAdjacency(db.Model):
         "Seat",
         foreign_keys=[adjacent_seat_id],
     )
+class AllocationRun(db.Model):
+    __tablename__ = "allocation_runs"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    examination_id = db.Column(
+        db.Integer,
+        db.ForeignKey("examinations.id"),
+        nullable=False,
+        unique=True,
+    )
+
+    seed = db.Column(
+        db.Integer,
+        nullable=False,
+        default=1,
+    )
+
+    status = db.Column(
+        db.String(20),
+        nullable=False,
+        default="completed",
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        server_default=db.func.now(),
+    )
+
+    examination = db.relationship(
+        "Examination",
+    )
+
+    allocations = db.relationship(
+        "SeatAllocation",
+        back_populates="allocation_run",
+        cascade="all, delete-orphan",
+    )
+
+
+class SeatAllocation(db.Model):
+    __tablename__ = "seat_allocations"
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "examination_id",
+            "student_id",
+            name="uq_exam_student_allocation",
+        ),
+        db.UniqueConstraint(
+            "examination_id",
+            "seat_id",
+            name="uq_exam_seat_allocation",
+        ),
+    )
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    allocation_run_id = db.Column(
+        db.Integer,
+        db.ForeignKey("allocation_runs.id"),
+        nullable=False,
+    )
+
+    examination_id = db.Column(
+        db.Integer,
+        db.ForeignKey("examinations.id"),
+        nullable=False,
+    )
+
+    student_id = db.Column(
+        db.Integer,
+        db.ForeignKey("students.id"),
+        nullable=False,
+    )
+
+    seat_id = db.Column(
+        db.Integer,
+        db.ForeignKey("seats.id"),
+        nullable=False,
+    )
+
+    manually_adjusted = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+    )
+
+    allocation_run = db.relationship(
+        "AllocationRun",
+        back_populates="allocations",
+    )
+
+    examination = db.relationship(
+        "Examination",
+    )
+
+    student = db.relationship(
+        "Student",
+    )
+
+    seat = db.relationship(
+        "Seat",
+    )
+
+
+class InvigilatorDuty(db.Model):
+    __tablename__ = "invigilator_duties"
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "examination_id",
+            "room_id",
+            name="uq_exam_room_invigilator",
+        ),
+        db.UniqueConstraint(
+            "examination_id",
+            "faculty_id",
+            name="uq_exam_faculty_invigilator",
+        ),
+    )
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    examination_id = db.Column(
+        db.Integer,
+        db.ForeignKey("examinations.id"),
+        nullable=False,
+    )
+
+    room_id = db.Column(
+        db.Integer,
+        db.ForeignKey("rooms.id"),
+        nullable=False,
+    )
+
+    faculty_id = db.Column(
+        db.Integer,
+        db.ForeignKey("faculties.id"),
+        nullable=False,
+    )
+
+    examination = db.relationship(
+        "Examination",
+    )
+
+    room = db.relationship(
+        "Room",
+    )
+
+    faculty = db.relationship(
+        "Faculty",
+    )
