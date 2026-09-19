@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}
+Seating Allocation | Examination Seat Allocator
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <p class="text-primary fw-semibold mb-2">
+            ADMINISTRATION
+        </p>
+
+        <h1 class="h2 fw-bold">
+            Seating Allocation
+        </h1>
+
+        <p class="text-secondary">
+            Generate a repeatable, optimized seating plan
+            for eligible students.
+        </p>
+
+        {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if success_message %}
+            <div class="alert alert-success">
+                {{ success_message }}
+            </div>
+        {% endif %}
+
+        <form method="get" class="row g-3">
+            <div class="col-md-9">
+                <label
+                    for="examination_id"
+                    class="form-label"
+                >
+                    Examination
+                </label>
+
+                <select
+                    id="examination_id"
+                    name="examination_id"
+                    class="form-select"
+                    required
+                >
+                    <option value="">
+                        Select Examination
+                    </option>
+
+                    {% for examination in examinations %}
+                        <option
+                            value="{{ examination.id }}"
+                            {% if
+                                selected_examination_id|string
+                                == examination.id|string
+                            %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ examination.exam_code }}
+                            —
+                            {{ examination.subject.subject_code }}
+                            —
+                            {{ examination.exam_date }}
+                            {{ examination.start_time.strftime(
+                                "%H:%M"
+                            ) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button
+                    class="btn btn-primary w-100"
+                    type="submit"
+                >
+                    Load Examination
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if view.examination %}
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body p-4">
+            <div
+                class="d-flex flex-wrap
+                       justify-content-between
+                       align-items-center gap-3"
+            >
+                <div>
+                    <h2 class="h4 fw-bold mb-1">
+                        {{ view.examination.exam_code }}
+                    </h2>
+
+                    <p class="text-secondary mb-0">
+                        {{ view.examination.subject.subject_code }}
+                        —
+                        {{ view.examination.subject.name }}
+                    </p>
+                </div>
+
+                {% if view.allocation_run %}
+                    <span class="badge text-bg-success">
+                        Allocated
+                    </span>
+                {% else %}
+                    <span class="badge text-bg-secondary">
+                        Not Allocated
+                    </span>
+                {% endif %}
+            </div>
+
+            <hr>
+
+            {% if not view.allocation_run %}
+                <form method="post">
+                    <input
+                        type="hidden"
+                        name="examination_id"
+                        value="{{ view.examination.id }}"
+                    >
+
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                        name="action"
+                        value="allocate"
+                    >
+                        Generate Seating Plan
+                    </button>
+                </form>
+            {% else %}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3">
+                            <div class="text-secondary small">
+                                Allocated Students
+                            </div>
+
+                            <div class="fs-4 fw-bold">
+                                {{ view.allocations|length }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3">
+                            <div class="text-secondary small">
+                                Allocation Seed
+                            </div>
+
+                            <div class="fs-4 fw-bold">
+                                {{ view.allocation_run.seed }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3">
+                            <div class="text-secondary small">
+                                Status
+                            </div>
+
+                            <div class="fs-4 fw-bold">
+                                {{ view.allocation_run.status|title }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" class="mb-4">
+                    <input
+                        type="hidden"
+                        name="examination_id"
+                        value="{{ view.examination.id }}"
+                    >
+
+                    <button
+                        class="btn btn-outline-danger"
+                        type="submit"
+                        name="action"
+                        value="regenerate"
+                        onclick="return confirm(
+                            'Regenerate this seating plan?'
+                        )"
+                    >
+                        Regenerate Allocation
+                    </button>
+                </form>
+
+                {% if view.allocations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Roll Number</th>
+                                    <th>Student</th>
+                                    <th>Branch</th>
+                                    <th>Room</th>
+                                    <th>Seat</th>
+                                    <th>Accessibility</th>
+                                    <th>Adjustment</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for allocation in
+                                    view.allocations %}
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                {{
+                                                    allocation.student
+                                                    .roll_number
+                                                }}
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            {{ allocation.student.name }}
+                                        </td>
+
+                                        <td>
+                                            {{
+                                                allocation.student
+                                                .branch.code
+                                            }}
+                                        </td>
+
+                                        <td>
+                                            {{
+                                                allocation.seat.room
+                                                .room_number
+                                            }}
+                                        </td>
+
+                                        <td>
+                                            <span
+                                                class="badge
+                                                       text-bg-primary"
+                                            >
+                                                {{
+                                                    allocation.seat
+                                                    .seat_code
+                                                }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            {% if
+                                                allocation.student
+                                                .special_request
+                                            %}
+                                                <span
+                                                    class="badge
+                                                           text-bg-warning"
+                                                >
+                                                    {{
+                                                        allocation.student
+                                                        .special_request
+                                                    }}
+                                                </span>
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if
+                                                allocation
+                                                .manually_adjusted
+                                            %}
+                                                Manual
+                                            {% else %}
+                                                Optimized
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card bg-light border-0 mt-4">
+                        <div class="card-body">
+                            <h3 class="h5 fw-bold">
+                                Manual Seat Swap
+                            </h3>
+
+                            <form
+                                method="post"
+                                class="row g-3"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="examination_id"
+                                    value="{{
+                                        view.examination.id
+                                    }}"
+                                >
+
+                                <div class="col-md-5">
+                                    <label
+                                        for="first_allocation_id"
+                                        class="form-label"
+                                    >
+                                        First Student
+                                    </label>
+
+                                    <select
+                                        id="first_allocation_id"
+                                        name="first_allocation_id"
+                                        class="form-select"
+                                        required
+                                    >
+                                        <option value="">
+                                            Select Student
+                                        </option>
+
+                                        {% for allocation in
+                                            view.allocations %}
+                                            <option
+                                                value="{{
+                                                    allocation.id
+                                                }}"
+                                            >
+                                                {{
+                                                    allocation.student
+                                                    .roll_number
+                                                }}
+                                                —
+                                                {{
+                                                    allocation.seat
+                                                    .room.room_number
+                                                }}
+                                                /
+                                                {{
+                                                    allocation.seat
+                                                    .seat_code
+                                                }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <label
+                                        for="second_allocation_id"
+                                        class="form-label"
+                                    >
+                                        Second Student
+                                    </label>
+
+                                    <select
+                                        id="second_allocation_id"
+                                        name="second_allocation_id"
+                                        class="form-select"
+                                        required
+                                    >
+                                        <option value="">
+                                            Select Student
+                                        </option>
+
+                                        {% for allocation in
+                                            view.allocations %}
+                                            <option
+                                                value="{{
+                                                    allocation.id
+                                                }}"
+                                            >
+                                                {{
+                                                    allocation.student
+                                                    .roll_number
+                                                }}
+                                                —
+                                                {{
+                                                    allocation.seat
+                                                    .room.room_number
+                                                }}
+                                                /
+                                                {{
+                                                    allocation.seat
+                                                    .seat_code
+                                                }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div
+                                    class="col-md-2
+                                           d-flex
+                                           align-items-end"
+                                >
+                                    <button
+                                        class="btn
+                                               btn-outline-primary
+                                               w-100"
+                                        type="submit"
+                                        name="action"
+                                        value="swap"
+                                    >
+                                        Swap
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

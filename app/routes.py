@@ -1,3 +1,9 @@
+from app.services.allocation_service import (
+    AllocationError,
+    allocate_examination,
+    get_allocation_view,
+    swap_allocations,
+)
 from app.services.eligibility_service import (
     EligibilityValidationError,
     get_eligibility_view,
@@ -306,6 +312,110 @@ def admin_eligibility():
         "admin_eligibility.html",
         subjects=subjects,
         selected_subject_id=selected_subject_id,
+        view=view,
+        error_message=error_message,
+        success_message=success_message,
+    )
+@main.route(
+    "/admin/allocations",
+    methods=["GET", "POST"],
+)
+def admin_allocations():
+    error_message = None
+    success_message = None
+
+    selected_examination_id = request.values.get(
+        "examination_id"
+    )
+
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        try:
+            if action == "allocate":
+                allocation_run = allocate_examination(
+                    selected_examination_id,
+                    regenerate=False,
+                )
+
+                success_message = (
+                    "Seating allocation completed "
+                    f"using seed {allocation_run.seed}."
+                )
+
+            elif action == "regenerate":
+                allocation_run = allocate_examination(
+                    selected_examination_id,
+                    regenerate=True,
+                )
+
+                success_message = (
+                    "Seating allocation regenerated "
+                    f"using seed {allocation_run.seed}."
+                )
+
+            elif action == "swap":
+                selected_examination_id = (
+                    swap_allocations(
+                        request.form.get(
+                            "first_allocation_id"
+                        ),
+                        request.form.get(
+                            "second_allocation_id"
+                        ),
+                    )
+                )
+
+                success_message = (
+                    "The selected seats were "
+                    "swapped successfully."
+                )
+
+            else:
+                raise AllocationError(
+                    "Select a valid allocation action."
+                )
+
+        except AllocationError as error:
+            error_message = str(error)
+
+        except SQLAlchemyError:
+            db.session.rollback()
+
+            error_message = (
+                "The seating operation could not "
+                "be completed. No database changes "
+                "were saved."
+            )
+
+    try:
+        view = get_allocation_view(
+            selected_examination_id
+        )
+
+    except AllocationError as error:
+        error_message = str(error)
+
+        view = {
+            "examination": None,
+            "allocation_run": None,
+            "allocations": [],
+        }
+
+    examinations = db.session.execute(
+        db.select(Examination).order_by(
+            Examination.exam_date,
+            Examination.start_time,
+            Examination.exam_code,
+        )
+    ).scalars().all()
+
+    return render_template(
+        "admin_allocations.html",
+        examinations=examinations,
+        selected_examination_id=(
+            selected_examination_id
+        ),
         view=view,
         error_message=error_message,
         success_message=success_message,
