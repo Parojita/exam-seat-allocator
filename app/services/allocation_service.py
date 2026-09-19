@@ -128,9 +128,39 @@ def get_adjacency_pairs(valid_seat_ids):
 
 
 def requires_accessible_seat(student):
-    return bool(
+    if not student.special_request:
+        return False
+
+    request_text = (
         student.special_request
-        and student.special_request.strip()
+        .strip()
+        .casefold()
+    )
+
+    placeholder_values = {
+        "",
+        "none",
+        "n/a",
+        "na",
+        "nan",
+        "no",
+        "nil",
+        "-",
+    }
+
+    if request_text in placeholder_values:
+        return False
+
+    accessibility_keywords = {
+        "wheelchair",
+        "mobility",
+        "accessible seat",
+        "ground floor",
+    }
+
+    return any(
+        keyword in request_text
+        for keyword in accessibility_keywords
     )
 
 

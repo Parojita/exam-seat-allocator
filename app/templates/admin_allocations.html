@@ -207,6 +207,7 @@ Seating Allocation | Examination Seat Allocator
                                     <th>Seat</th>
                                     <th>Accessibility</th>
                                     <th>Adjustment</th>
+<th>Hall Ticket</th>
                                 </tr>
                             </thead>
 
@@ -214,6 +215,19 @@ Seating Allocation | Examination Seat Allocator
                                 {% for allocation in
                                     view.allocations %}
                                     <tr>
+<td>
+    <a
+        class="btn btn-sm btn-outline-primary"
+        href="{{
+            url_for(
+                'main.download_hall_ticket',
+                allocation_id=allocation.id
+            )
+        }}"
+    >
+        Download PDF
+    </a>
+</td>
                                         <td>
                                             <strong>
                                                 {{

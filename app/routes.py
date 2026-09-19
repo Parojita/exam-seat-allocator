@@ -1,3 +1,8 @@
+from app.services.hall_ticket_service import (
+    HallTicketError,
+    generate_hall_ticket_pdf,
+    get_hall_ticket_record,
+)
 from app.services.allocation_service import (
     AllocationError,
     allocate_examination,
@@ -12,7 +17,14 @@ from app.services.eligibility_service import (
 from pathlib import Path
 from zipfile import BadZipFile
 
-from flask import Blueprint, render_template, request
+from flask import (
+    Blueprint,
+    abort,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
@@ -419,4 +431,49 @@ def admin_allocations():
         view=view,
         error_message=error_message,
         success_message=success_message,
+    )
+@main.get(
+    "/hall-ticket/<int:allocation_id>.pdf"
+)
+def download_hall_ticket(allocation_id):
+    try:
+        verification_url = url_for(
+            "main.verify_hall_ticket",
+            allocation_id=allocation_id,
+            _external=True,
+        )
+
+        pdf_file, filename = (
+            generate_hall_ticket_pdf(
+                allocation_id,
+                verification_url,
+            )
+        )
+
+    except HallTicketError as error:
+        abort(404, description=str(error))
+
+    return send_file(
+        pdf_file,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename,
+    )
+
+
+@main.get(
+    "/verify/hall-ticket/<int:allocation_id>"
+)
+def verify_hall_ticket(allocation_id):
+    try:
+        allocation = get_hall_ticket_record(
+            allocation_id
+        )
+
+    except HallTicketError as error:
+        abort(404, description=str(error))
+
+    return render_template(
+        "hall_ticket_verification.html",
+        allocation=allocation,
     )

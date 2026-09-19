@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}
+Hall Ticket Verification
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <div class="alert alert-success">
+            This hall ticket matches a saved
+            examination allocation.
+        </div>
+
+        <h1 class="h3 fw-bold">
+            Hall Ticket Verification
+        </h1>
+
+        <table class="table mt-4">
+            <tbody>
+                <tr>
+                    <th>Student</th>
+                    <td>
+                        {{ allocation.student.name }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Roll Number</th>
+                    <td>
+                        {{ allocation.student.roll_number }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Examination</th>
+                    <td>
+                        {{ allocation.examination.exam_code }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Subject</th>
+                    <td>
+                        {{
+                            allocation.examination
+                            .subject.subject_code
+                        }}
+                        -
+                        {{
+                            allocation.examination
+                            .subject.name
+                        }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Date</th>
+                    <td>
+                        {{
+                            allocation.examination
+                            .exam_date
+                        }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Room</th>
+                    <td>
+                        {{
+                            allocation.seat.room
+                            .room_number
+                        }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Seat</th>
+                    <td>
+                        {{ allocation.seat.seat_code }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

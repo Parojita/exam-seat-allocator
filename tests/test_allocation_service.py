@@ -503,3 +503,63 @@ def test_simultaneous_examinations_cannot_reuse_seat():
             match="Insufficient seating capacity",
         ):
             allocate_examination(ece_exam.id)
+@pytest.mark.parametrize(
+    "special_request",
+    [
+        "None",
+        "none",
+        "N/A",
+        "Front-row seating",
+        "Extra writing space",
+    ],
+)
+def test_non_mobility_request_does_not_require_accessible_seat(
+    special_request,
+):
+    app = create_test_app()
+
+    with app.app_context():
+        branch = create_branch("CSE")
+        subject = create_subject("CSE307", branch)
+
+        examination = create_examination(
+            "EXAM-CSE307",
+            subject,
+        )
+
+        student = create_student(
+            "CSE001",
+            branch,
+            special_request=special_request,
+        )
+
+        room, seats = create_room_with_seats(
+            1,
+            accessible_positions=set(),
+        )
+
+        db.session.add_all(
+            [
+                branch,
+                subject,
+                examination,
+                student,
+                create_eligibility(
+                    student,
+                    subject,
+                ),
+                room,
+                *seats,
+            ]
+        )
+
+        db.session.commit()
+
+        allocate_examination(examination.id)
+
+        allocation = db.session.scalar(
+            db.select(SeatAllocation)
+        )
+
+        assert allocation is not None
+        assert allocation.seat.accessible is False
